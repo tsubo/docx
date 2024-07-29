@@ -117,7 +117,6 @@ func (d *Docx) ReplaceTagContaining(oldTag string, searchString string, newStrin
 	}
 	for _, content := range reg.FindAllString(d.content, -1) {
 		if strings.Contains(content, searchString) {
-			println(content)
 			d.content = strings.Replace(d.content, content, newString, 1)
 		}
 	}
