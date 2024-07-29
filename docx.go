@@ -109,13 +109,17 @@ func (d *Docx) Replace(oldString string, newString string, num int) (err error) 
 }
 
 func (d *Docx) ReplaceTagContaining(oldTag string, searchString string, newString string) error {
-	expr := "<" + oldTag + `.*?>.*?` + searchString + `.*?</\` + oldTag + ">"
+	// <oldTab 属性>...</oldTab> もしくは <oldTab>...</oldTab> の形式のタグを検索
+	expr := `<` + oldTag + `(?: [^>]*)?>.*?</` + oldTag + `>`
 	reg, err := regexp.Compile(expr)
 	if err != nil {
 		return err
 	}
 	for _, content := range reg.FindAllString(d.content, -1) {
-		d.content = strings.Replace(d.content, content, newString, 1)
+		if strings.Contains(content, searchString) {
+			println(content)
+			d.content = strings.Replace(d.content, content, newString, 1)
+		}
 	}
 
 	return nil
