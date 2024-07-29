@@ -3,7 +3,7 @@ package main
 import (
 	"strconv"
 
-	"github.com/nguyenthenguyen/docx"
+	"github.com/tsubo/docx"
 )
 
 // Note - this sample code does not perform error checking, etc.
