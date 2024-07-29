@@ -119,7 +119,7 @@ func TestReplaceTagContaining(t *testing.T) {
 		replaced     bool
 	}{
 		{"Tag are replaced", "w:p", "document", "<w:tbl></w:tbl>", true},
-		{"Tag are not replaced", "<w:p>", "NON-EXISTENT WORD", "<w:tbl></w:tbl>", false},
+		{"Tag are not replaced", "w:p", "NON-EXISTENT WORD", "<w:tbl></w:tbl>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -129,7 +129,12 @@ func TestReplaceTagContaining(t *testing.T) {
 
 			d = loadFile(testFileResult)
 
+			// searchString を含む oldTag が newString に置換されているか確認
 			if strings.Contains(d.content, tt.newString) != tt.replaced {
+				t.Error("Incorrect replacement result", d.content)
+			}
+			// searchString を含まない oldTag が newString に置換されていないか確認
+			if !strings.Contains(d.content, "This is a") {
 				t.Error("Incorrect replacement result", d.content)
 			}
 		})
