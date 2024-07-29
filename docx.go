@@ -11,16 +11,17 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 )
 
-//Contains functions to work with data from a zip file
+// Contains functions to work with data from a zip file
 type ZipData interface {
 	files() []*zip.File
 	close() error
 }
 
-//Type for in memory zip files
+// Type for in memory zip files
 type ZipInMemory struct {
 	data *zip.Reader
 }
@@ -29,13 +30,13 @@ func (d ZipInMemory) files() []*zip.File {
 	return d.data.File
 }
 
-//Since there is nothing to close for in memory, just nil the data and return nil
+// Since there is nothing to close for in memory, just nil the data and return nil
 func (d ZipInMemory) close() error {
 	d.data = nil
 	return nil
 }
 
-//Type for zip files read from disk
+// Type for zip files read from disk
 type ZipFile struct {
 	data *zip.ReadCloser
 }
@@ -103,6 +104,19 @@ func (d *Docx) Replace(oldString string, newString string, num int) (err error) 
 		return err
 	}
 	d.content = strings.Replace(d.content, oldString, newString, num)
+
+	return nil
+}
+
+func (d *Docx) ReplaceTagContaining(oldTag string, searchString string, newString string) error {
+	expr := "<" + oldTag + `>.*?` + searchString + `.*?</\` + oldTag + ">"
+	reg, err := regexp.Compile(expr)
+	if err != nil {
+		return err
+	}
+	for _, content := range reg.FindAllString(d.content, -1) {
+		d.content = strings.Replace(d.content, content, newString, 1)
+	}
 
 	return nil
 }
@@ -194,7 +208,7 @@ func replaceHeaderFooter(headerFooter map[string]string, oldString string, newSt
 	return nil
 }
 
-//ReadDocxFromFS opens a docx file from the file system
+// ReadDocxFromFS opens a docx file from the file system
 func ReadDocxFromFS(file string, fs fs.FS) (*ReplaceDocx, error) {
 	f, err := fs.Open(file)
 	if err != nil {
