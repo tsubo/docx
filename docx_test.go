@@ -43,13 +43,13 @@ func loadFromFs(file string) *Docx {
 	return r.Editable()
 }
 
-//Tests that we are able to load a file from a filesystem and do a quick replacement test
+// Tests that we are able to load a file from a filesystem and do a quick replacement test
 func TestReadDocxFromFS(t *testing.T) {
 	d := loadFromFs(testFile)
 	simpleReplacementTest(d, t)
 }
 
-//Tests that we are able to load a file from a memory array of bytes
+// Tests that we are able to load a file from a memory array of bytes
 func TestReadDocxFromMemory(t *testing.T) {
 	d := loadFromMemory(testFile)
 	simpleReplacementTest(d, t)
@@ -108,6 +108,32 @@ func TestReplace(t *testing.T) {
 // to have changed
 func extractMiddle(start, end int, content string) string {
 	return fmt.Sprint(content[start:end])
+}
+
+func TestReplaceTagContaining(t *testing.T) {
+	tests := []struct {
+		name         string
+		oldTag       string
+		searchString string
+		newString    string
+		replaced     bool
+	}{
+		{"Tag are replaced", "w:p", "document", "<w:tbl></w:tbl>", true},
+		{"Tag are not replaced", "<w:p>", "NON-EXISTENT WORD", "<w:tbl></w:tbl>", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := loadFile(testFile)
+			d.ReplaceTagContaining(tt.oldTag, tt.searchString, tt.newString)
+			d.WriteToFile(testFileResult)
+
+			d = loadFile(testFileResult)
+
+			if strings.Contains(d.content, tt.newString) != tt.replaced {
+				t.Error("Incorrect replacement result", d.content)
+			}
+		})
+	}
 }
 
 func TestReplaceLink(t *testing.T) {
