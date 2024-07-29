@@ -109,7 +109,7 @@ func (d *Docx) Replace(oldString string, newString string, num int) (err error) 
 }
 
 func (d *Docx) ReplaceTagContaining(oldTag string, searchString string, newString string) error {
-	expr := "<" + oldTag + `>.*?` + searchString + `.*?</\` + oldTag + ">"
+	expr := "<" + oldTag + `.*?>.*?` + searchString + `.*?</\` + oldTag + ">"
 	reg, err := regexp.Compile(expr)
 	if err != nil {
 		return err
